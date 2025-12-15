@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-download {
+            background: #667eea;
+            color: white;
+        }
+        
+        .video-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .video-info.show {
+            display: block;
+        }
+        
+        .video-info img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .video-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .video-info p {
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 YouTube Downloader</h1>
+        
+        <div class="input-group">
+            <input 
+                type="text" 
+                id="videoUrl" 
+                placeholder="Cole a URL do vídeo do YouTube aqui..."
+            >
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn-info" onclick="getVideoInfo()">
+                📋 Ver Informações
+            </button>
+            <button class="btn-download" onclick="downloadVideo()">
+                ⬇️ Baixar Vídeo
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            Carregando... ⏳
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="video-info" id="videoInfo">
+            <img id="thumbnail" src="" alt="Thumbnail">
+            <h3 id="title"></h3>
+            <p><strong>Canal:</strong> <span id="uploader"></span></p>
+            <p><strong>Duração:</strong> <span id="duration"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // URL da sua API (altere para o endereço do seu servidor)
+        const API_URL = 'https://f1fb878c-7d3e-4ede-b87f-0654c776eb8c-00-3u0yl85htzmzl.riker.replit.dev';
+        
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('error').classList.remove('show');
+            document.getElementById('videoInfo').classList.remove('show');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            hideLoading();
+        }
+        
+        function formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m ${secs}s`;
+            }
+            return `${minutes}m ${secs}s`;
+        }
+        
+        async function getVideoInfo() {
+            const url = document.getElementById('videoUrl').value;
+            
+            if (!url) {
+                showError('Por favor, cole uma URL do YouTube');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_URL}/info?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro ao buscar informações');
+                }
+                
+                // Mostrar informações do vídeo
+                document.getElementById('thumbnail').src = data.thumbnail;
+                document.getElementById('title').textContent = data.title;
+                document.getElementById('uploader').textContent = data.uploader;
+                document.getElementById('duration').textContent = formatDuration(data.duration);
+                
+                document.getElementById('videoInfo').classList.add('show');
+                hideLoading();
+                
+            } catch (error) {
+                showError('Erro: ' + error.message);
+            }
+        }
+        
+        async function downloadVideo() {
+            const url = document.getElementById('videoUrl').value;
+            
+            if (!url) {
+                showError('Por favor, cole uma URL do YouTube');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                // Criar link de download
+                const downloadUrl = `${API_URL}/download?url=${encodeURIComponent(url)}`;
+                
+                // Abrir em nova aba para iniciar o download
+                window.open(downloadUrl, '_blank');
+                
+                hideLoading();
+                
+            } catch (error) {
+                showError('Erro ao baixar: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
