@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-load {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-load:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-load:active {
+            transform: translateY(0);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .video-preview {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .video-preview.show {
+            display: block;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .video-info {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .video-info img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .video-details h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        .video-details p {
+            color: #666;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .options-section {
+            margin-top: 25px;
+        }
+        
+        .options-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .download-options {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .option-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .option-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .option-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .option-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge-video {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-audio {
+            background: #fce7f3;
+            color: #9f1239;
+        }
+        
+        .badge-quality {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .option-details {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .option-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-download {
+            flex: 1;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-download:hover {
+            background: #5568d3;
+        }
+        
+        .btn-audio {
+            background: #ec4899;
+        }
+        
+        .btn-audio:hover {
+            background: #db2777;
+        }
+        
+        .formats-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .formats-toggle {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .formats-toggle:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .formats-list {
+            display: none;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .formats-list.show {
+            display: block;
+        }
+        
+        .format-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .format-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .format-info {
+            flex: 1;
+        }
+        
+        .format-info strong {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .format-info span {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .format-download {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .format-download:hover {
+            background: #5568d3;
+        }
+        
+        @media (max-width: 768px) {
+            .video-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .option-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 YouTube Downloader Pro</h1>
+            <p>Baixe vídeos de YouTube, TikTok, Instagram, Facebook e 1000+ sites</p>
+        </div>
+        
+        <div class="main-card">
+            <div class="input-section">
+                <div class="input-group">
+                    <label>🔗 Cole a URL do vídeo</label>
+                    <input 
+                        type="text" 
+                        id="videoUrl" 
+                        placeholder="https://www.youtube.com/watch?v=..."
+                    >
+                </div>
+                
+                <button class="btn-load" onclick="loadVideo()">
+                    🚀 Carregar Vídeo
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Carregando informações do vídeo...</p>
+            </div>
+            
+            <div class="error" id="error"></div>
+            
+            <div class="video-preview" id="videoPreview">
+                <div class="video-info">
+                    <img id="thumbnail" src="" alt="Thumbnail">
+                    <div class="video-details">
+                        <h3 id="title"></h3>
+                        <p><strong>📺 Canal:</strong> <span id="uploader"></span></p>
+                        <p><strong>⏱️ Duração:</strong> <span id="duration"></span></p>
+                        <p><strong>👁️ Visualizações:</strong> <span id="views"></span></p>
+                        <p><strong>📅 Publicado:</strong> <span id="date"></span></p>
+                    </div>
+                </div>
+                
+                <div class="options-section">
+                    <h4>📥 Escolha uma opção de download:</h4>
+                    
+                    <div class="download-options">
+                        <div class="option-card">
+                            <div class="option-header">
+                                <span class="option-title">🎬 Melhor Qualidade (Vídeo + Áudio)</span>
+                                <span class="option-badge badge-quality">RECOMENDADO</span>
+                            </div>
+                            <div class="option-details">
+                                Baixa o vídeo na melhor qualidade disponível com áudio incluído
+                            </div>
+                            <div class="option-actions">
+                                <button class="btn-download" onclick="downloadBest()">
+                                    ⬇️ Baixar Melhor Qualidade
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="option-card">
+                            <div class="option-header">
+                                <span class="option-title">🎵 Apenas Áudio (MP3)</span>
+                                <span class="option-badge badge-audio">ÁUDIO</span>
+                            </div>
+                            <div class="option-details">
+                                Extrai apenas o áudio do vídeo e converte para MP3
+                            </div>
+                            <div class="option-actions">
+                                <button class="btn-download btn-audio" onclick="downloadAudio()">
+                                    🎧 Baixar MP3
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="option-card">
+                            <div class="option-header">
+                                <span class="option-title">📺 Qualidades Específicas</span>
+                                <span class="option-badge badge-video">VÍDEO</span>
+                            </div>
+                            <div class="option-details">
+                                Escolha entre 1080p, 720p, 480p, 360p
+                            </div>
+                            <div class="option-actions">
+                                <button class="btn-download" onclick="download1080p()">1080p Full HD</button>
+                                <button class="btn-download" onclick="download720p()">720p HD</button>
+                                <button class="btn-download" onclick="download480p()">480p SD</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formats-section">
+                    <button class="formats-toggle" onclick="toggleFormats()">
+                        🔧 Ver Todos os Formatos Disponíveis
+                    </button>
+                    <div class="formats-list" id="formatsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ALTERE PARA A URL DA SUA API
+        const API_URL = 'https://youtube-downloader-api-1-lgmy.onrender.com';
+        
+        let currentUrl = '';
+        
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('error').classList.remove('show');
+            document.getElementById('videoPreview').classList.remove('show');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('show');
+            hideLoading();
+        }
+        
+        function formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m ${secs}s`;
+            }
+            return `${minutes}m ${secs}s`;
+        }
+        
+        function formatNumber(num) {
+            if (!num) return 'N/A';
+            return num.toLocaleString('pt-BR');
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            // PyTube retorna ISO format (2024-12-15T00:00:00)
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('pt-BR');
+            } catch {
+                return 'N/A';
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (!bytes) return 'N/A';
+            const mb = (bytes / (1024 * 1024)).toFixed(2);
+            return `${mb} MB`;
+        }
+        
+        async function loadVideo() {
+            const url = document.getElementById('videoUrl').value.trim();
+            
+            if (!url) {
+                showError('Por favor, cole uma URL válida');
+                return;
+            }
+            
+            currentUrl = url;
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_URL}/info?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro ao buscar informações');
+                }
+                
+                // Preencher informações
+                document.getElementById('thumbnail').src = data.thumbnail;
+                document.getElementById('title').textContent = data.title;
+                document.getElementById('uploader').textContent = data.uploader || data.author;
+                document.getElementById('duration').textContent = data.duration_string || formatDuration(data.duration);
+                document.getElementById('views').textContent = formatNumber(data.view_count);
+                document.getElementById('date').textContent = formatDate(data.publish_date || data.upload_date);
+                
+                // Mostrar preview
+                document.getElementById('videoPreview').classList.add('show');
+                hideLoading();
+                
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        
+        function downloadBest() {
+            if (!currentUrl) return;
+            const downloadUrl = `${API_URL}/download?url=${encodeURIComponent(currentUrl)}&quality=highest`;
+            window.open(downloadUrl, '_blank');
+        }
+        
+        function downloadAudio() {
+            if (!currentUrl) return;
+            const downloadUrl = `${API_URL}/download-audio?url=${encodeURIComponent(currentUrl)}`;
+            window.open(downloadUrl, '_blank');
+        }
+        
+        function download1080p() {
+            if (!currentUrl) return;
+            const downloadUrl = `${API_URL}/download?url=${encodeURIComponent(currentUrl)}&quality=1080p`;
+            window.open(downloadUrl, '_blank');
+        }
+        
+        function download720p() {
+            if (!currentUrl) return;
+            const downloadUrl = `${API_URL}/download?url=${encodeURIComponent(currentUrl)}&quality=720p`;
+            window.open(downloadUrl, '_blank');
+        }
+        
+        function download480p() {
+            if (!currentUrl) return;
+            const downloadUrl = `${API_URL}/download?url=${encodeURIComponent(currentUrl)}&quality=480p`;
+            window.open(downloadUrl, '_blank');
+        }
+        
+        async function toggleFormats() {
+            const formatsList = document.getElementById('formatsList');
+            
+            if (formatsList.classList.contains('show')) {
+                formatsList.classList.remove('show');
+                return;
+            }
+            
+            if (formatsList.innerHTML) {
+                formatsList.classList.add('show');
+                return;
+            }
+            
+            // Carregar formatos
+            try {
+                const response = await fetch(`${API_URL}/formats?url=${encodeURIComponent(currentUrl)}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro ao buscar formatos');
+                }
+                
+                let html = '';
+                data.formats.forEach(fmt => {
+                    const resolution = fmt.resolution || 'N/A';
+                    const filesize = fmt.filesize_mb ? `${fmt.filesize_mb} MB` : 'N/A';
+                    const hasVideo = fmt.includes_video ? '🎬 Vídeo' : '';
+                    const hasAudio = fmt.includes_audio ? '🎵 Áudio' : '';
+                    const media = [hasVideo, hasAudio].filter(Boolean).join(' + ') || 'N/A';
+                    
+                    html += `
+                        <div class="format-item">
+                            <div class="format-info">
+                                <strong>${resolution} - ${fmt.mime_type || 'N/A'}</strong>
+                                <span>
+                                    ${filesize} | ${media} | ${fmt.fps ? fmt.fps + 'fps' : ''}
+                                </span>
+                            </div>
+                            <button class="format-download" onclick="downloadFormat('${fmt.itag}')">
+                                Baixar
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                formatsList.innerHTML = html;
+                formatsList.classList.add('show');
+                
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        
+        function downloadFormat(formatId) {
+            if (!currentUrl) return;
+            const downloadUrl = `${API_URL}/download?url=${encodeURIComponent(currentUrl)}&format=${formatId}`;
+            window.open(downloadUrl, '_blank');
+        }
+    </script>
+</body>
+</html>

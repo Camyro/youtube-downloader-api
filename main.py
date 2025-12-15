@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from pytube import YouTube, Playlist
-from pytube.exceptions import AgeRestrictedError, VideoUnavailable, RegexMatchError
+from pytubefix import YouTube, Playlist
+from pytubefix.exceptions import AgeRestrictedError, VideoUnavailable, RegexMatchError
 import os
 import tempfile
 import shutil
