@@ -15,32 +15,17 @@ BASE_YDL_OPTS = {
     'quiet': True,
     'no_warnings': True,
     'ignoreerrors': False,
-    'no_color': True,
-    'noprogress': True,
     'geo_bypass': True,
     'socket_timeout': 30,
-    'retries': 10,
-    'fragment_retries': 10,
-    'skip_unavailable_fragments': True,
-    'keepvideo': False,
-    'overwrites': True,
-    'noplaylist': True,
-    'extract_flat': False,
-    'age_limit': None,
-    'nocheckcertificate': False,
-    'prefer_ffmpeg': True,
     'extractor_args': {
         'youtube': {
-            'player_client': ['ios'],
+            'player_client': ['android_embedded'],
+            'skip': ['dash', 'hls']
         }
     },
     'http_headers': {
-        'User-Agent': 'com.google.ios.youtube/19.45.4 (iPhone; U; CPU iOS 15_6 like Mac OS X)',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate',
-    },
-    'compat_opts': set(),
+        'User-Agent': 'com.google.android.youtube/17.36.4 (Linux; U; Android 12) gzip',
+    }
 }
 
 FORMAT_OPTIONS = {
